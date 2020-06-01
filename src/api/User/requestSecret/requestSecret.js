@@ -1,0 +1,26 @@
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({path: path.resolve(__dirname, ".env")});
+
+import {sendSecretMail} from "../../../utils";
+import { generateSecret} from "../../../utils";
+import { prisma } from "../../../../generated/prisma-client";
+export default {
+    Mutation:{
+        requestSecret: async(_, args) => {
+            const { email } = args;
+            const loginSecret = generateSecret();
+            console.log(email);
+            console.log(loginSecret);
+            try{
+                await sendSecretMail(email, loginSecret);
+                await prisma.updateUser({data: { loginSecret }, where: { email }});
+                return true;
+            } catch {
+                return false;
+            }
+
+
+        }
+    }
+};
